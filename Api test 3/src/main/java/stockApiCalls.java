@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.*;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -23,14 +20,18 @@ public class stockApiCalls {
     // used to check if the api limit has been reached (5 a minute)
     private Boolean failstate;
 
+    private databaseConnect databaseConnection;
+
 
     public stockApiCalls() {
+        this.databaseConnection = new databaseConnect();
         this.search = new stockSearch();
         this.dailyDates = new HashMap<String, String>();
         this.monthlyDates = new HashMap<String, String>();
         this.weeklyDates = new HashMap<String, String>();
         this.sortedKeys = new ArrayList<String>();
         this.failstate=false;
+
     }
 
 
@@ -44,6 +45,10 @@ public class stockApiCalls {
 
     public HashMap<String, String> getMonthlyDates() {
         return monthlyDates;
+    }
+
+    public String getStockName(){
+        return search.getStockName();
     }
 
 
@@ -105,6 +110,18 @@ public class stockApiCalls {
             // sorting mechanism for ordering
             this.sortedKeys = new ArrayList<String>(dateMap.keySet());
         }
+    }
+    public void pushToDatabase(){
+        String stockID = Integer.toString(databaseConnection.getStockID(getStockName()));
+        Iterator it = getDailyDates().entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry pair = (Map.Entry)it.next();
+            //System.out.println(pair.getKey()+":"+pair.getValue());
+            databaseConnection.getStockID(getStockName());
+            databaseConnection.push(getStockName(),pair.getKey().toString(),pair.getValue().toString(),stockID,"day");
+            it.remove();
+        }
+
     }
 }
 

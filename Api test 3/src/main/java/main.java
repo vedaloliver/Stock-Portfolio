@@ -11,14 +11,23 @@ import java.util.Scanner;
 class main {
     public static void main(String[] args) throws Exception {
 
-        stockApiCalls api = new stockApiCalls();
-        //stockSearch search = new stockSearch();
+//        databaseConnect dataConnection = new databaseConnect();
+//        dataConnection.push("h","222","222","222","222");
 
-      System.out.println(api.dailyRecentPrice());
+        databaseConnect connect = new databaseConnect();
+        //connect.deleteAllEntries();
+
+
+
+
+
+        stockApiCalls api = new stockApiCalls();
+        System.out.println(api.dailyRecentPrice());
         System.out.println(api.weeklyRecentPrice());
        System.out.println(api.monthlyRecentPrice());
+        api.pushToDatabase();
 
-        //stockInput();
+
     }
 
 }

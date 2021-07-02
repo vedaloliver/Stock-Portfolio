@@ -81,7 +81,6 @@ public class stockSearch {
         System.out.println(getStocksList().keySet());
         String stockName = " " ;
 
-
         while (true) {
             stockName = myObj.nextLine();
             if (getStocksList().keySet().contains(stockName.toUpperCase())) {
