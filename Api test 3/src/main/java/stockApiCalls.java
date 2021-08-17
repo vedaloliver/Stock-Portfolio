@@ -23,9 +23,21 @@ public class stockApiCalls {
     private JSONObject JSONRaw;
 
 
+
+
     public stockApiCalls() {
         this.databaseConnection = new databaseConnect();
         this.search = new stockSearch();
+        this.dailyDates = new HashMap<String, String>();
+        this.monthlyDates = new HashMap<String, String>();
+        this.weeklyDates = new HashMap<String, String>();
+        this.failstate=false;
+
+        this.JSONRaw = new JSONObject();
+    }
+    // separate constructor for 'updating stock' functionality
+    public stockApiCalls(int n) {
+        this.databaseConnection = new databaseConnect();
         this.dailyDates = new HashMap<String, String>();
         this.monthlyDates = new HashMap<String, String>();
         this.weeklyDates = new HashMap<String, String>();
@@ -53,26 +65,23 @@ public class stockApiCalls {
 
 
 
-    public JSONObject dailyPriceToJSon() throws Exception {
-        return apiCallDate("DAILY", "Time Series (Daily)");
+//    public JSONObject dailyPriceToJSon() throws Exception {
+//        return apiCallDate("DAILY", "Time Series (Daily)");
+//
+//    }
 
-    }
-    public JSONObject weeklyPriceToJSon() throws Exception {
-        return apiCallDate("WEEKLY", "Weekly Adjusted Time Series");
-
-    }
-    public JSONObject monthlyPriceToJSon() throws Exception {
-        return apiCallDate("MONTHLY", "Monthly Adjusted Time Series");
-
-    }
+//    public JSONObject monthlyPriceToJSon() throws Exception {
+//        return apiCallDate("MONTHLY", "Monthly Adjusted Time Series");
+//
+//    }
 
 
     // api calling function to return json
-    public JSONObject apiCallDate(String timePeriod, String label) throws Exception {
+    public JSONObject apiCallDate(String timePeriod, String label, String stockName) throws Exception {
         JSONObject dateReturn = new JSONObject();
 
         this.failstate=false;
-        HttpResponse<JsonNode> responses = Unirest.get("https://alpha-vantage.p.rapidapi.com/query?symbol=" + search.getStockName() + "&function=TIME_SERIES_" + timePeriod + "_ADJUSTED&datatype=json")
+        HttpResponse<JsonNode> responses = Unirest.get("https://alpha-vantage.p.rapidapi.com/query?symbol=" + stockName + "&function=TIME_SERIES_" + timePeriod + "_ADJUSTED&datatype=json")
                 .header("x-rapidapi-key", "3552eb7274msh1b4efa3154d110dp111434jsnb6d80eeb8d2a")
                 .header("x-rapidapi-host", "alpha-vantage.p.rapidapi.com")
                 .asJson();
@@ -93,16 +102,13 @@ public class stockApiCalls {
     }
 
     public void pushToDatabase() throws Exception {
-        if (failstate == false) {
-
             String stockID = Integer.toString(databaseConnection.getStockID(getStockName()));
             //databaseConnection.push(getStockName(), "0", dailyPriceToJSon().toString(), stockID, "Day");
-            databaseConnection.push(getStockName(), "0", weeklyPriceToJSon().toString(), stockID, "Week");
+            databaseConnection.push(getStockName(), "0", apiCallDate("WEEKLY", "Weekly Adjusted Time Series",
+                    search.getStockName()).toString(), stockID, "Week");
             //databaseConnection.push(getStockName(), "0", monthlyPriceToJSon().toString(), stockID, "Month");
-        }else{
-            System.out.println("Used up all the api requests. Please wait a minute.");
         }
         }
-    }
+
 
 

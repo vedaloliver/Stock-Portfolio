@@ -1,5 +1,4 @@
 import java.sql.*;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +15,10 @@ public class databaseConnect {
         this.choice = 0;
         this.stockValue = -1;
         this.stockname = "";
-
         this.nameSet = new HashSet<String>();
     }
 
+    // Simple getters
     public int getChoice() {
         return this.choice;
     }
@@ -134,6 +133,7 @@ public class databaseConnect {
         return pulledJSONData;
     }
 
+    // Returns the amount of individual company stocks in the database
     public int getNumberOfStocks() {
         int returnStatement = -1;
         int numbers = 0;
@@ -148,7 +148,6 @@ public class databaseConnect {
             // SQL statement
             ResultSet results = statement.executeQuery("SELECT stock_name FROM stockvalues ");
 
-
             while (results.next()) {
                 nameSet.add(results.getString(1));
             }
@@ -162,6 +161,7 @@ public class databaseConnect {
         return returnStatement;
     }
 
+    // Parses and provides names of the stocks present
     public Set<String> getStockNamesPresent() {
         return nameSet;
     }
@@ -276,5 +276,14 @@ public class databaseConnect {
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
+    // deletes entire row and adds it again to provide updated data
+    public void updateEntry(String name) throws Exception {
+        stockApiCalls api = new stockApiCalls(1);
+        deleteEntry(name);
+        String stockID = Integer.toString(getStockID(name));
+        push(name, "0",api.apiCallDate("WEEKLY","Weekly Adjusted Time Series",name).toString(),stockID,"Week");
+        System.out.println("Updated entry");
+
     }
 }

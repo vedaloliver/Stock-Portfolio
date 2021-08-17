@@ -53,8 +53,9 @@ public class userInterface {
             else if (choice.equals("4")){
                 databaseConnect.deleteAllEntries();
                 System.out.println("\nBringing you back to the main menu....");
-
             }
+            else if (choice.equals("5"))
+                updateStock();
             else if (choice.equals("x".toUpperCase())) {
                 break;
             }
@@ -83,6 +84,13 @@ public class userInterface {
         Scanner inputStockDelete = new Scanner(System.in);
         String choice2 = inputStockDelete.nextLine();
         databaseConnect.deleteEntry(choice2);
+    }
+
+    public void updateStock() throws Exception {
+        System.out.println("Please provide the code of the stock you want to update");
+        Scanner inputStockUpdate = new Scanner(System.in);
+        String choice3 = inputStockUpdate.nextLine();
+        databaseConnect.updateEntry(choice3);
     }
 
 

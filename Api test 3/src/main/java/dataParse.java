@@ -1,9 +1,9 @@
-import com.google.gson.JsonParser;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.text.ParseException;
+import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class dataParse {
 
@@ -58,11 +58,45 @@ public class dataParse {
     }
 
 
-    // retrieves chronologically earliest date|value combination
+    // retrieves chronologically earliest |value combination
     public String RecentPrice() throws Exception {
-            return "Date = " + sortedKeys.get(0) + " | Value = " + getDateMap().get(sortedKeys.get(0));
+        String returnStatement = "";
+        if (timeSinceUpdating()>1 && timeSinceUpdating()<7) {
+            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0)) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago)";
+        } else if (timeSinceUpdating()>7){
+            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0)) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago. Please update stock data)";
+
+        } else if (timeSinceUpdating()==1){
+            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated "+timeSinceUpdating()+" day ago)";
+        } else if (timeSinceUpdating() ==0){
+            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated today)";
         }
-    // retrieves chronologically earliest date|value combination
+
+        return returnStatement;
+    }
+    public String recentDate() {
+        return sortedKeys.get(0);
+    }
+
+    // how many days since the stock entry was updated
+    public long timeSinceUpdating() throws ParseException {
+        long difference_In_Days=0;
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+        try{
+
+            Date d1 = sdf.parse(recentDate());
+            //current time in epoch time
+            long currentTimeStamp = System.currentTimeMillis();
+
+            // gets time difference and converts it into days
+            long difference_In_Time = currentTimeStamp - d1.getTime();
+            difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return difference_In_Days;
+    }
+    // retrieves chronologically earliest date|value|
     public void allPrices() throws Exception {
         for (int i=0;i<sortedKeys.size();i++){
             System.out.println("Date = " + sortedKeys.get(i) + " | Value = " + getDateMap().get(sortedKeys.get(i)));

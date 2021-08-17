@@ -11,7 +11,7 @@ import java.util.Scanner;
 class main {
     public static void main(String[] args) throws Exception {
 
-//
+
         userInterface ui =  new userInterface();
         ui.landingPage();
 
@@ -24,15 +24,14 @@ class main {
 
 
 //        dataParse parsing = new dataParse("AAPL");
-//        parsing.allPrices();
-//        System.out.println(parsing.processrawJSON("AAPL"));
-
+//        parsing.timeSinceUpdating();
 
 
 //          FOR ADDING STOCKS TO THE DATABASE
 //        stockApiCalls api = new stockApiCalls();
 //
 //        api.pushToDatabase();
+
 
 
 
