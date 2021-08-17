@@ -11,8 +11,6 @@ public class stockApiCalls {
     private HashMap<String, String> weeklyDates;
     private HashMap<String, String> monthlyDates;
 
-    // sorts the chosen date category to retreive the soonest/display sorted dates
-    private ArrayList<String> sortedKeys;
 
     // search class constructor
     private stockSearch search;
@@ -22,6 +20,8 @@ public class stockApiCalls {
 
     private databaseConnect databaseConnection;
 
+    private JSONObject JSONRaw;
+
 
     public stockApiCalls() {
         this.databaseConnection = new databaseConnect();
@@ -29,9 +29,9 @@ public class stockApiCalls {
         this.dailyDates = new HashMap<String, String>();
         this.monthlyDates = new HashMap<String, String>();
         this.weeklyDates = new HashMap<String, String>();
-        this.sortedKeys = new ArrayList<String>();
         this.failstate=false;
 
+        this.JSONRaw = new JSONObject();
     }
 
 
@@ -52,43 +52,25 @@ public class stockApiCalls {
     }
 
 
-    // gets most recent price of stock in terms of day
-    public String dailyRecentPrice() throws Exception {
-        apiCallDate("DAILY", "Time Series (Daily)", getDailyDates());
-        // if exceeding api requests
-        if (this.failstate == false) {
-            Collections.sort(this.sortedKeys, Collections.reverseOrder());
-            // getting the first entry / chronologically earliest
-            return "Date = " + sortedKeys.get(0) + " Value = " + getDailyDates().get(sortedKeys.get(0));
-        }
-        return "Max requests per minute reached. Please wait and try again";
+
+    public JSONObject dailyPriceToJSon() throws Exception {
+        return apiCallDate("DAILY", "Time Series (Daily)");
+
+    }
+    public JSONObject weeklyPriceToJSon() throws Exception {
+        return apiCallDate("WEEKLY", "Weekly Adjusted Time Series");
+
+    }
+    public JSONObject monthlyPriceToJSon() throws Exception {
+        return apiCallDate("MONTHLY", "Monthly Adjusted Time Series");
+
     }
 
 
-    public String weeklyRecentPrice() throws Exception {
-        apiCallDate("WEEKLY", "Weekly Adjusted Time Series", getWeeklyDates());
-        if (this.failstate == false) {
-            Collections.sort(this.sortedKeys, Collections.reverseOrder());
-            // getting the first entry / chronologically earliest
+    // api calling function to return json
+    public JSONObject apiCallDate(String timePeriod, String label) throws Exception {
+        JSONObject dateReturn = new JSONObject();
 
-            return "Date = " + sortedKeys.get(0) + " Value = " + getWeeklyDates().get(sortedKeys.get(0));
-        }
-        return "Max requests per minute reached. Please wait and try again";
-    }
-
-    public String monthlyRecentPrice() throws Exception {
-        apiCallDate("MONTHLY", "Monthly Adjusted Time Series", getMonthlyDates());
-        if (this.failstate == false) {
-            Collections.sort(this.sortedKeys, Collections.reverseOrder());
-            // getting the first entry / chronologically earliest
-
-            return "Date = " + sortedKeys.get(0) + " Value = " + getMonthlyDates().get(sortedKeys.get(0));
-        }
-        return "Max requests per minute reached. Please wait and try again";
-    }
-
-    // api calling function
-    public void apiCallDate(String timePeriod, String label, HashMap<String, String> dateMap) throws Exception {
         this.failstate=false;
         HttpResponse<JsonNode> responses = Unirest.get("https://alpha-vantage.p.rapidapi.com/query?symbol=" + search.getStockName() + "&function=TIME_SERIES_" + timePeriod + "_ADJUSTED&datatype=json")
                 .header("x-rapidapi-key", "3552eb7274msh1b4efa3154d110dp111434jsnb6d80eeb8d2a")
@@ -100,28 +82,27 @@ public class stockApiCalls {
         // checks if the json message returned is notifying of API request max limit
         if (toObj.toString().equals("{\"message\":\"You have exceeded the rate limit per minute for your plan, BASIC, by the API provider\"}")) {
             failstate = true;
+            System.out.println("exceeded api requests, Please try again soon.");
+            System.exit(0);
 
         } else {
             JSONObject dates = toObj.getJSONObject(label);
-            // puts it into a map correspondign to date and value
-            for (String i : dates.keySet()) {
-                dateMap.put(i, (String) dates.getJSONObject(i).get("1. open"));
-            }
-            // sorting mechanism for ordering
-            this.sortedKeys = new ArrayList<String>(dateMap.keySet());
+            dateReturn = dates;
         }
+        return dateReturn;
     }
-    public void pushToDatabase(){
-        String stockID = Integer.toString(databaseConnection.getStockID(getStockName()));
-        Iterator it = getDailyDates().entrySet().iterator();
-        while (it.hasNext()){
-            Map.Entry pair = (Map.Entry)it.next();
-            //System.out.println(pair.getKey()+":"+pair.getValue());
-            databaseConnection.getStockID(getStockName());
-            databaseConnection.push(getStockName(),pair.getKey().toString(),pair.getValue().toString(),stockID,"day");
-            it.remove();
-        }
 
+    public void pushToDatabase() throws Exception {
+        if (failstate == false) {
+
+            String stockID = Integer.toString(databaseConnection.getStockID(getStockName()));
+            //databaseConnection.push(getStockName(), "0", dailyPriceToJSon().toString(), stockID, "Day");
+            databaseConnection.push(getStockName(), "0", weeklyPriceToJSon().toString(), stockID, "Week");
+            //databaseConnection.push(getStockName(), "0", monthlyPriceToJSon().toString(), stockID, "Month");
+        }else{
+            System.out.println("Used up all the api requests. Please wait a minute.");
+        }
+        }
     }
-}
+
 

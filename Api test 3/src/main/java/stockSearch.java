@@ -10,6 +10,9 @@ public class stockSearch {
     private String stockName;
     private HashMap<String, String> map;
 
+    // used to check if the api limit has been reached (5 a minute)
+    private Boolean failstate;
+
 
     public stockSearch(){
         this.stockName = "";
@@ -44,6 +47,8 @@ public class stockSearch {
 
     // uses the API to search for the keyword, returning an array of symbols
     public HashMap<String, String> stockSearch() throws Exception {
+        JSONArray arr = null;
+        while(true){
         while (true) {
             String keyword = stockInput();
             HttpResponse<JsonNode> request = Unirest.get("https://alpha-vantage.p.rapidapi.com/query?keywords=" + keyword + "&function=SYMBOL_SEARCH&datatype=json")
@@ -52,27 +57,37 @@ public class stockSearch {
                     .asJson();
             // parses down and gets matches
             JSONObject toObj = request.getBody().getObject();
-            JSONArray arr = toObj.getJSONArray("bestMatches");
+            //System.out.println(toObj.toString());
 
-            // link symbol with name
 
-            // interates and gets each symbol present
-            int counter = 0;
-            for (Object i : arr) {
-                String name = ((String) arr.getJSONObject(counter).get("2. name"));
-                String symbol = ((String) arr.getJSONObject(counter).get("1. symbol"));
-                getStocksList().put(symbol, name);
-                counter++;
-            }
-            if (!getStocksList().isEmpty()){
-                System.out.println("valid");
+            if (toObj.toString().equals("{\"message\":\"You have exceeded the rate limit per minute for your plan, BASIC, by the API provider\"}")) {
+                System.out.println("Please wait a min, API requests exceeded...");
+
+            } else {
+                arr = toObj.getJSONArray("bestMatches");
                 break;
-            }else{
-                System.out.println("Could not find any matches. please try again");
             }
         }
-        return getStocksList();
-    }
+                // link symbol with name
+
+                // interates and gets each symbol present
+                int counter = 0;
+                for (Object i : arr) {
+                    String name = ((String) arr.getJSONObject(counter).get("2. name"));
+                    String symbol = ((String) arr.getJSONObject(counter).get("1. symbol"));
+                    getStocksList().put(symbol, name);
+                    counter++;
+                }
+                if (!getStocksList().isEmpty()) {
+                    System.out.println("valid");
+                    break;
+                } else {
+                    System.out.println("Could not find any matches. please try again");
+                }
+            }
+            return getStocksList();
+        }
+
 
     // user will choose the stock symbol out of the list provided
     public  String chooseStock() {
