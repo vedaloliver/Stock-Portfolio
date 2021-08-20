@@ -12,12 +12,11 @@ class main {
     public static void main(String[] args) throws Exception {
 
 
-        userInterface ui =  new userInterface();
-        ui.landingPage();
-
 //        databaseConnect dataConnection = new databaseConnect();
-//        dataConnection.push("h","222","222","222","222");
-//
+//        System.out.println(dataConnection.getStockNamesPresent());
+//        System.out.println(dataConnection.checkInputInDatabase("AAPL"));
+//        System.out.println(dataConnection.checkInputInDatabase("AgfdgAPL"));
+////
 //        databaseConnect connect = new databaseConnect();
 //        System.out.println(connect.getNumberOfStocks());
 

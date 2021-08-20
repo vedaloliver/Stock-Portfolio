@@ -1,5 +1,6 @@
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -57,19 +58,37 @@ public class dataParse {
 
     }
 
+    // returned API data is given in USD. Converts to UK currency
+    // lazy way of doing it; can use yahoo finance api. If completed everything than do this aswell
+    public String usdToGbp(String USDprice) {
+        Double toFloat = Double.valueOf(USDprice);
+        Double toGBP = (toFloat * 0.73);
+        DecimalFormat df = new DecimalFormat("#.##");
+        String toGBPString = Double.valueOf(df.format(toGBP)).toString();
+        return toGBPString;
+    }
+
+    public String checkIfUserGaveData(){
+        Boolean bool = false;
+        if (bool == false){
+            return "No valuation data. Please update";
+        } else{
+            return "valuation at XXX gbp, a XXX% increase from insertion";
+        }
+    }
 
     // retrieves chronologically earliest |value combination
     public String RecentPrice() throws Exception {
         String returnStatement = "";
         if (timeSinceUpdating()>1 && timeSinceUpdating()<7) {
-            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0)) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago)";
+            returnStatement = "Stock Price = £" + usdToGbp(getDateMap().get(sortedKeys.get(0))) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago) | Valuation: "+ checkIfUserGaveData();
         } else if (timeSinceUpdating()>7){
-            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0)) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago. Please update stock data)";
+            returnStatement = "Stock Price = £" + getDateMap().get(sortedKeys.get(0)) + " | Date = " + sortedKeys.get(0) + " (Updated " + timeSinceUpdating() + " days ago. Please update stock data) | " + checkIfUserGaveData();
 
         } else if (timeSinceUpdating()==1){
-            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated "+timeSinceUpdating()+" day ago)";
+            returnStatement = "Stock Price = £" + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated "+timeSinceUpdating()+" day ago) | " + checkIfUserGaveData();
         } else if (timeSinceUpdating() ==0){
-            returnStatement = "Value = " + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated today)";
+            returnStatement = "Stock Price = £" + getDateMap().get(sortedKeys.get(0))+" | Date = " + sortedKeys.get(0) + " (Updated today) | " + checkIfUserGaveData();
         }
 
         return returnStatement;

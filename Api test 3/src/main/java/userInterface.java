@@ -28,8 +28,9 @@ public class userInterface {
     public void choice() throws Exception {
         while (true) {
             Scanner input = new Scanner(System.in);
-            System.out.println("\nPlease use the menu to choose what you want to do:\n1: View your data\n2: Add new stock data to the portfolio \n3: Delete a stock by name\n" +
-                    "4: Clear all portfolio data\n5: Update individual stock data\nX: Exit the program");
+            System.out.println("\nPlease use the menu to choose what you want to do:\n1: View your data\n2: Add new stock data to the portfolio \n" +
+                    "3:Add wealth data to stock \n4: Delete a stock by name\n" +
+                    "5: Clear all portfolio data\n6: Update individual stock data\nX: Exit the program");
             String choice = input.nextLine();
             System.out.println("You have chose option "+ choice+".");
 
@@ -39,22 +40,30 @@ public class userInterface {
 
 
             }
+
             else if (choice.equals("2")){
                 addStock();
                 System.out.println("\nBringing you back to the main menu....");
 
             }
-            else if (choice.equals("3")){
-                deleteStock();
+
+            if (choice.equals("3")){
+                addWealthData();
                 System.out.println("\nBringing you back to the main menu....");
 
 
             }
             else if (choice.equals("4")){
+                deleteStock();
+                System.out.println("\nBringing you back to the main menu....");
+
+
+            }
+            else if (choice.equals("5")){
                 databaseConnect.deleteAllEntries();
                 System.out.println("\nBringing you back to the main menu....");
             }
-            else if (choice.equals("5"))
+            else if (choice.equals("6"))
                 updateStock();
             else if (choice.equals("x".toUpperCase())) {
                 break;
@@ -77,6 +86,32 @@ public class userInterface {
     public void addStock() throws Exception {
     stockApiCalls stockAdd = new stockApiCalls();
     stockAdd.pushToDatabase();
+    }
+
+
+    // Step 1: ask for what stock you're including
+    // Step 2 : check if that stock is actually in database 1 if not provide error
+    // step 3: request for money inputted, and the date
+    // step 4: array created and database will take each and upload it ]
+
+    // make second database
+    // database will have Stock data/money/date
+    public void addWealthData() throws Exception{
+        // checks if the name the user enters is actually in the database
+        while(true) {
+            System.out.println("Please provide the name of the stock you want to add monetary value to:");
+            Scanner inputWealth = new Scanner(System.in);
+            String stockNameChoice = inputWealth.nextLine();
+            if (databaseConnect.checkInputInDatabase(stockNameChoice) == false) {
+                System.out.println(stockNameChoice + " is not in the database, please input again");
+            } else if (databaseConnect.checkInputInDatabase(stockNameChoice) == true) {
+                System.out.println(stockNameChoice + " is in the database");
+                break;
+            }
+        }
+
+        //databaseConnect.push("microsoft", "13th sept","billions");
+
     }
 
     public void deleteStock() throws SQLException {

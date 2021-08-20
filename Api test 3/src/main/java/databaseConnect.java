@@ -51,6 +51,26 @@ public class databaseConnect {
         }
     }
 
+    // method overloading
+    // for uploading wealth data to second database
+    public void push(String stockName, String dateAdded, String wealth) {
+        this.connection = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            this.connection = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5432/user_wealth",
+                    "postgres", "postgres");
+            if (this.connection != null) {
+                addToDatabase(stockName, dateAdded, wealth);
+            } else {
+                System.out.println("Connection failed");
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
     // methods for adding field data
     public void addToDatabase(String stockName, String date, String value, String stockID, String dateType) {
         try {
@@ -66,6 +86,24 @@ public class databaseConnect {
             System.out.println(e);
         }
     }
+
+    // push to wealth database
+    // method overloading
+    public void addToDatabase(String stockName, String dateAdded, String wealth) {
+        try {
+            // sample sql addition
+            String sql = "INSERT INTO user_wealth (stock_name,date_added,wealth)"
+                    + " VALUES ( '" + stockName + "','" + dateAdded + "','" + wealth + "')";
+            Statement statement = connection.createStatement();
+            int rows = statement.executeUpdate(sql);
+            if (rows > 0) {
+                System.out.println("A new entry is added ");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 
     // checks if stock is present in database
     public boolean checkIfStockPresent(String stock) {
@@ -163,7 +201,17 @@ public class databaseConnect {
 
     // Parses and provides names of the stocks present
     public Set<String> getStockNamesPresent() {
+        getNumberOfStocks();
         return nameSet;
+    }
+    // for adding wealth data - check if users input is valid
+    public boolean checkInputInDatabase(String input){
+        if (getStockNamesPresent().contains(input.toUpperCase())){
+            return true;
+        }else{
+            return false;
+        }
+
     }
 
     // search for the stock and see if it's in there. if so, get that value id and return it
@@ -277,13 +325,15 @@ public class databaseConnect {
             System.out.println(e);
         }
     }
+
     // deletes entire row and adds it again to provide updated data
     public void updateEntry(String name) throws Exception {
         stockApiCalls api = new stockApiCalls(1);
         deleteEntry(name);
         String stockID = Integer.toString(getStockID(name));
-        push(name, "0",api.apiCallDate("WEEKLY","Weekly Adjusted Time Series",name).toString(),stockID,"Week");
+        push(name, "0", api.apiCallDate("WEEKLY", "Weekly Adjusted Time Series", name).toString(), stockID, "Week");
         System.out.println("Updated entry");
 
     }
 }
+
