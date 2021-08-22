@@ -11,6 +11,9 @@ import java.util.Scanner;
 class main {
     public static void main(String[] args) throws Exception {
 
+        userInterface ui = new userInterface();
+        ui.landingPage();
+
 
 //        databaseConnect dataConnection = new databaseConnect();
 //        System.out.println(dataConnection.getStockNamesPresent());

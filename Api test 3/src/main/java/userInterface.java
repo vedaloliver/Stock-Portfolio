@@ -1,5 +1,8 @@
 import javax.xml.crypto.Data;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class userInterface {
@@ -98,10 +101,11 @@ public class userInterface {
     // database will have Stock data/money/date
     public void addWealthData() throws Exception{
         // checks if the name the user enters is actually in the database
+        String stockNameChoice = "";
         while(true) {
             System.out.println("Please provide the name of the stock you want to add monetary value to:");
-            Scanner inputWealth = new Scanner(System.in);
-            String stockNameChoice = inputWealth.nextLine();
+            Scanner inputWealthName = new Scanner(System.in);
+            stockNameChoice = inputWealthName.nextLine();
             if (databaseConnect.checkInputInDatabase(stockNameChoice) == false) {
                 System.out.println(stockNameChoice + " is not in the database, please input again");
             } else if (databaseConnect.checkInputInDatabase(stockNameChoice) == true) {
@@ -109,8 +113,44 @@ public class userInterface {
                 break;
             }
         }
+        // gets wealth data
+        // if providing an incorrect formula then dont progress
+        double wealth = 0;
+        while(true){
+            System.out.println("Next, please provide the amount of money you invested into the stock");
+            Scanner inputWealthValue = new Scanner(System.in);
+            String input =  inputWealthValue.nextLine();
+            try{
+                wealth = Double.parseDouble(input);
+                break;
+            }catch (NumberFormatException ex){
+                System.out.println("input is not a valid value, please try again");
+            }
+        }
 
-        //databaseConnect.push("microsoft", "13th sept","billions");
+        // getting the date the user inputted the stock
+        //they will need to provide the date in the exact specificatons
+        // 2021-08-16 - yyyy-MM-dd
+        String date = "";
+        while(true){
+            System.out.println("Finally, please provide us with the date you invested. proivde the date in the format "+
+                    "yyyy-MM-dd.");
+            Scanner inputDateValue = new Scanner(System.in);
+            date=  inputDateValue.nextLine();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            format.setLenient(false);
+            try{
+                Date dateFormat = format.parse(date);
+                System.out.println(date+ " is a valid format");
+                break;
+            }catch (ParseException e){
+                System.out.println(date+ " is an invalid format. try again");
+            }
+        }
+        System.out.println("Adding £" + wealth+" to " +  stockNameChoice.toUpperCase()+".");
+        String wealthString = Double.toString(wealth);
+
+        databaseConnect.push(stockNameChoice, date,wealthString);
 
     }
 
