@@ -10,12 +10,18 @@ public class databaseConnect {
     private int stockValue;
     private Set<String> nameSet;
 
+    // Secondary database transfer
+    private String userWealthValue;
+    private String userInvestmentDate;
+    private String userWealthInput;
+
 
     public databaseConnect() {
         this.choice = 0;
         this.stockValue = -1;
         this.stockname = "";
         this.nameSet = new HashSet<String>();
+        this.userWealthValue = "";
     }
 
     // Simple getters
@@ -29,6 +35,16 @@ public class databaseConnect {
 
     public String getStockname() {
         return this.stockname;
+    }
+
+    public String getUserWealthInput(){
+        return this.userWealthInput;
+    }
+    public String getUserInvestmentDate(){
+        return this.userInvestmentDate;
+    }
+    public String getUserWealthValue(){
+        return this.userWealthValue;
     }
 
     // each time is called will check for connection validity
@@ -93,7 +109,7 @@ public class databaseConnect {
         try {
             // sample sql addition
             String sql = "INSERT INTO user_wealth (stock_name,date_added,wealth)"
-                    + " VALUES ( '" + stockName + "','" + dateAdded + "','" + wealth + "')";
+                    + " VALUES ( '" + stockName.toUpperCase() + "','" + dateAdded + "','" + wealth + "')";
             Statement statement = connection.createStatement();
             int rows = statement.executeUpdate(sql);
             if (rows > 0) {
@@ -211,7 +227,6 @@ public class databaseConnect {
         }else{
             return false;
         }
-
     }
 
     // search for the stock and see if it's in there. if so, get that value id and return it
@@ -259,6 +274,43 @@ public class databaseConnect {
         return returnStatement;
     }
 
+
+    public Boolean getWealthData(String name){
+        Boolean bool;
+        String printStatement = "";
+        try {
+            // delte this later
+            Class.forName("org.postgresql.Driver");
+            this.connection = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5432/user_wealth",
+                    "postgres", "postgres");
+
+            Statement statement = this.connection.createStatement();
+            // returns all of the values from the table
+            ResultSet results = statement.executeQuery("SELECT * FROM user_wealth WHERE stock_name = '"+name+"' ");
+
+            while (results.next()) {
+                String stock_name = results.getString("stock_name");
+                String date_added = results.getString("date_added");
+                String wealth = results.getString("wealth");
+                 printStatement = date_added +" "+ wealth;
+                 this.userWealthInput = printStatement;
+                 this.userWealthValue = wealth;
+                 this.userInvestmentDate = date_added;
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        if(printStatement == ""){
+            bool = false;
+            return bool;
+        }
+        else{
+            bool = true;
+            return bool;
+        }
+    }
 
     // looks for the stock id when given the name ; used for deleting the stock
     public int findStockID(String stock) {

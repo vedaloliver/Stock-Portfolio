@@ -26,7 +26,10 @@ class main {
 
 
 //        dataParse parsing = new dataParse("AAPL");
-//        parsing.timeSinceUpdating();
+//        System.out.println(parsing.RecentPrice());
+//        parsing.closestDate();
+//        parsing.convertWealthToday();
+
 
 
 //          FOR ADDING STOCKS TO THE DATABASE
