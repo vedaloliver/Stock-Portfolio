@@ -24,6 +24,7 @@ public class dataParse {
     private String userWealthValue;
     // Converted new user wealth from before date
     long  userNewWealth;
+    int number;
 
 
 
